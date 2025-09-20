@@ -1,0 +1,6 @@
+torch==2.5.0 
+torchaudio==2.5.0 
+torchvision==0.20.0 
+pyaudio==0.2.14 
+playwright==1.38.0 
+TTS==0.17.4 
