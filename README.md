@@ -1,7 +1,7 @@
 本项目使用python3.9.13版本开发，请自行安装python3.9.13
 # 克隆项目到本地
 ```bash
-git clone https://github.com/1z2y3x4w5/cqnu-pingjiao
+git clone https://github.com/1z2y3x4w5/fif_gui
 ```
 
 # 创建虚拟环境：
