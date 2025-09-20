@@ -48,7 +48,10 @@ src
 
 
 # 引用
-- [Aurorabili/fuckfi](https://github.com/Aurorabili/fuckfif)
+- [Aurorabili/fuckfif](https://github.com/Aurorabili/fuckfif)
 - [microsoft/playwright](https://github.com/microsoft/playwright)
 - [Edresson/YourTTS](https://github.com/Edresson/YourTTS)
 - [coqui-ai/TTS](https://github.com/coqui-ai/TTS)
+
+# 致谢
+- 非常感谢Aurorabili的fuckfif项目，提供了思路，我在他的项目基础上进行修改，添加了适用于Windows系统的虚拟麦克风功能，优化了connector模块实现了问答类作业的完成，以及实现了图像交互功能
