@@ -1,4 +1,14 @@
-本项目使用python3.9.13版本开发，请自行安装python3.9.13
+<div align="center">
+    <h1 align="center">fif_gui</h1>
+    <p align="center">使用生成语音全自动完成FiF英语口语作业</p>
+</div>
+
+# 声明
+## 本项目使用python3.9.13版本开发，请自行安装python3.9.13，下载网站如下：
+```bash
+https://www.python.org/downloads/release/python-3913/
+```
+
 # 克隆项目到本地
 ```bash
 git clone https://github.com/1z2y3x4w5/fif_gui
