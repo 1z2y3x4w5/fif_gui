@@ -91,7 +91,7 @@ python -m pip install pipwin
 python -m pipwin install pyaudio
 ```
 
-或者下载对应 Python 版本的 [wheel] 手动安装。(https://github.com/cgohlke/win_arm64-wheels)
+或者下载对应 Python 版本的 [wheel](https://github.com/cgohlke/win_arm64-wheels) 手动安装。
 
 - 如果使用 Linux，请确保系统安装 
 	- ffmpeg：用于音频转流
