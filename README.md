@@ -73,7 +73,7 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 ```
 
-	- 如果不使用 GPU（CPU-only）：
+- 如果不使用 GPU（CPU-only）：
 
 ```powershell
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
@@ -82,8 +82,8 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 （或者直接使用 pip install torch --index-url ...，依据 PyTorch 官方安装页选择最合适命令）
 
 6. pyaudio :
-	- Windows 上常见安装建议:
-	Windows 上 pip install pyaudio 容易失败（需要编译 C 扩展）。常用替代：
+- Windows 上常见安装建议:
+Windows 上 pip install pyaudio 容易失败（需要编译 C 扩展）。常用替代：
 
 ```powershell
 python -m pip install pipwin
@@ -92,10 +92,10 @@ python -m pipwin install pyaudio
 
 或者下载对应 Python 版本的 wheel 手动安装。
 
-	- 如果使用 Linux，请确保系统安装 
-		- ffmpeg：用于音频转流
-		- pulseaudio（或 pipewire/pactl）：如果"module-pipe-source"，确保 pulseaudio 可用并允许加载模块
-		安装示例（Debian/Ubuntu）：
+- 如果使用 Linux，请确保系统安装 
+	- ffmpeg：用于音频转流
+	- pulseaudio（或 pipewire/pactl）：如果"module-pipe-source"，确保 pulseaudio 可用并允许加载模块
+安装示例（Debian/Ubuntu）：
 
 ```powershell
 sudo apt update
