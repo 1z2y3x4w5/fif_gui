@@ -6,4 +6,3 @@ playwright==1.41.1
 soundfile==0.12.1
 tqdm==4.65.0
 num2words==0.5.14
-pytest==7.4.3
