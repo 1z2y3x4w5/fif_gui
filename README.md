@@ -67,7 +67,7 @@ python -m playwright install
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 ```
 
-	- 若使用 CUDA 12.1：
+- 若使用 CUDA 12.1：
 
 ```powershell
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
