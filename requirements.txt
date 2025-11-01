@@ -1,0 +1,9 @@
+TTS==0.15.0
+torch==2.7.1
+numpy==1.24.3
+pyaudio==0.2.13
+playwright==1.41.1
+soundfile==0.12.1
+tqdm==4.65.0
+num2words==0.5.14
+pytest==7.4.3
