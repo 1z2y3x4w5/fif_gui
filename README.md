@@ -28,6 +28,8 @@
 - 声明
   - 借鉴
   - 引用
+- 注意事项
+
 ---
 
 ## 简介
@@ -323,3 +325,12 @@ pyinstaller src\main.py --onefile --noconsole --name fif_gui --add-data "config.
 - [microsoft/playwright](https://github.com/microsoft/playwright)
 - [Edresson/YourTTS](https://github.com/Edresson/YourTTS)
 - [coqui-ai/TTS](https://github.com/coqui-ai/TTS)
+
+## 注意事项
+
+- 本程序仅用于学习，请勿用于非法用途。
+- 仅适用于 FiF 官网的页面，其他站点请自行修改代码。
+- 本项目由 Python 3.11 开发，请使用 Python 3.11 或更高版本运行，低于 python 3.11 的用户请自行修改代码。
+- Windows 系统用户请下载虚拟麦克风模块，并配置为默认输入源。
+- 若末设置等级类型规则，则等级名“Role-play”将默认为“对话”，非等级名“Role-play”将默认为“跟读”。
+- 默认使用 GPU 模式，请自行配置 GPU 环境。
