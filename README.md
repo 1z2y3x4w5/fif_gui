@@ -3,7 +3,7 @@
     <p align="center">TTS自动化完成FiF口语</p>
 </div>
 
-## 目录
+# 目录
 
 - 简介
 - 快速准备（依赖与环境）
@@ -25,7 +25,9 @@
   - 其它说明
 - 规则示例与使用场景
 - 常见问题与故障排查
-
+- 声明
+  - 借鉴
+  - 引用
 ---
 
 ## 简介
@@ -309,3 +311,15 @@ pyinstaller src\main.py --onefile --noconsole --name fif_gui --add-data "config.
 5. 跟读/对话识别不准确：
 	- 使用“等级类型规则”显式指定；
 	- 如果你愿意，可以把规则改为更严格的匹配（在 GUI 中填写更具体的 `level_pattern`）。
+
+## 声明
+
+### 借鉴
+
+- [Aurorabili/fuckfif](https://github.com/Aurorabili/fuckfif)
+
+### 引用
+
+- [microsoft/playwright](https://github.com/microsoft/playwright)
+- [Edresson/YourTTS](https://github.com/Edresson/YourTTS)
+- [coqui-ai/TTS](https://github.com/coqui-ai/TTS)
