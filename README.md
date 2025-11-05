@@ -49,7 +49,7 @@
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+.\.venv\Scripts\activate
 python -m pip install -U pip setuptools wheel
 ```
 
