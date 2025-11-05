@@ -66,7 +66,7 @@ python -m playwright install
 ```
 
 5. PyTorch（>=2.0.0） 安装（按是否使用 GPU）
-	- 如果你想用 GPU（以 CUDA 11.8 为例）：
+  - 如果你想用 GPU（以 CUDA 11.8 为例）：
 
 ```powershell
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
@@ -334,3 +334,4 @@ pyinstaller src\main.py --onefile --noconsole --name fif_gui --add-data "config.
 - Windows 系统用户请下载虚拟麦克风模块，并配置为默认输入源。
 - 若末设置等级类型规则，则等级名“Role-play”将默认为“对话”，非等级名“Role-play”将默认为“跟读”。
 - 默认使用 GPU 模式，请自行配置 GPU 环境。
+
