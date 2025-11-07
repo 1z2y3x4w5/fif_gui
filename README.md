@@ -17,18 +17,13 @@
   - 如何运行测试
   - 测试文件说明
 - 配置文件说明（`config.json`）
-- 打包为 EXE 文件（Windows）
-  - 步骤一：安装 PyInstaller
-  - 步骤二：打包命令（推荐参数）
-  - 步骤三：体积优化建议
-  - 步骤四：运行与分发
-  - 其它说明
 - 规则示例与使用场景
 - 常见问题与故障排查
 - 声明
   - 借鉴
   - 引用
 - 注意事项
+- 其他说明
 
 ---
 
@@ -47,50 +42,50 @@
 1. Python：建议使用 3.11（请按你的环境调整）。
 2. 创建虚拟环境:
 
-```powershell
+```python
 python -m venv .venv
 .\.venv\Scripts\activate
 python -m pip install -U pip setuptools wheel
 ```
 
-3. 安装 Python 依赖：
-
-```powershell
-python -m pip install -r requirements.txt
-```
-
-4. Playwright游览器二进制安装（必须运行一次）
-
-```powershell
-python -m playwright install
-```
-
-5. PyTorch（>=2.0.0） 安装（按是否使用 GPU）
+3. PyTorch（>=2.0.0） 安装（按是否使用 GPU）
   - 如果你想用 GPU（以 CUDA 11.8 为例）：
 
-```powershell
+```python
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 ```
 
 - 若使用 CUDA 12.1：
 
-```powershell
+```python
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 ```
 
 - 如果不使用 GPU（CPU-only）：
 
-```powershell
+```python
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 ```
 
 （或者直接使用 pip install torch --index-url ...，依据 PyTorch 官方安装页选择最合适命令）
 
+4. 安装其他 Python 依赖：
+
+```python
+python -m pip install -r requirements.txt
+```
+
+5. Playwright游览器二进制安装（必须运行一次）
+
+```python
+python -m playwright install
+```
+
 6. pyaudio :
 - Windows 上常见安装建议:
 Windows 上 pip install pyaudio 容易失败（需要编译 C 扩展）。常用替代：
 
-```powershell
+```python
 python -m pip install pipwin
 python -m pipwin install pyaudio
 ```
@@ -102,7 +97,7 @@ python -m pipwin install pyaudio
 	- pulseaudio（或 pipewire/pactl）：如果"module-pipe-source"，确保 pulseaudio 可用并允许加载模块
 安装示例（Debian/Ubuntu）：
 
-```powershell
+```python
 sudo apt update
 sudo apt install -y ffmpeg pulseaudio pavucontrol
 ```
@@ -115,7 +110,7 @@ sudo apt install -y ffmpeg pulseaudio pavucontrol
 
 在项目根目录运行：
 
-```powershell
+```python
 python src\main.py
 ```
 
@@ -180,15 +175,15 @@ python src\main.py
 ### 如何运行测试
 
 1. 首次需安装 pytest：
-	```powershell
+	```python
 	python -m pip install pytest
 	```
 2. 在项目根目录运行所有测试：
-	```powershell
+	```python
 	pytest
 	```
 3. 你可以单独运行某个测试文件，例如：
-	```powershell
+	```python
 	pytest tests/test_tts.py
 	```
 
@@ -223,61 +218,6 @@ python src\main.py
 - `level_type_rules` 是等级类型规则（用于将某些等级强制识别为对话或跟读）。
 
 手动编辑 `config.json` 时请保持 JSON 格式正确，并在保存后在 GUI 中点击“刷新”或重启以加载。
-
-## 打包为 EXE 文件（Windows）
-
-本项目可通过 PyInstaller 打包为单个 exe 文件，适用于 Windows 平台。
-
-### 步骤一：安装 PyInstaller
-
-建议使用 5.13.0 及以上版本（兼容 Python 3.10+）：
-```powershell
-python -m pip install pyinstaller
-```
-
-### 步骤二：打包命令（推荐参数）
-
-在项目根目录下运行：
-```powershell
-pyinstaller src\main.py --onefile --noconsole --name fif_gui --add-data "config.json;." --add-data "draft;draft" --add-data "tmp;tmp" --exclude-module test --exclude-module tests --exclude-module pip --exclude-module setuptools --exclude-module wheel
-```
-参数说明：
-- `--onefile`：生成单个 exe 文件（体积最小化，便于分发）
-- `--noconsole`：不弹出命令行窗口（GUI 程序推荐）
-- `--name fif_gui`：生成的 exe 文件名
-- `--add-data`：打包所需的配置、音色、临时目录（可按需调整）
-- `--exclude-module`：排除无用模块（如测试、pip、setuptools、wheel 等）
-
-### 步骤三：体积优化建议
-
-- 只打包必须的依赖和资源，尽量排除测试、开发工具、未用到的第三方包。
-- 若 TTS 模型文件较大，可在首次运行时下载，不随 exe 一起分发。
-- 可用 UPX 压缩 exe（需安装 upx，PyInstaller 自动检测）：
-	- 下载并安装 upx：https://upx.github.io/
-	- 打包时自动压缩（PyInstaller 会检测 upx 并使用）。
-- 删除 exe 旁生成的 build/、dist/ 目录下无用文件，仅保留最终 exe。
-
-### 步骤四：运行与分发
-
-打包完成后，最终 exe 文件在 `dist/` 目录下（如 `dist\fif_gui.exe`）。
-可直接双击运行，无需 Python 环境。
-如需分发，请确保 `config.json`、`draft/`、`tmp/` 等必要资源一并提供。
-
-### 其它说明
-
-- Playwright 浏览器二进制（chromium）不随 exe 打包，首次运行需在目标机器上执行：
-	```powershell
-	python -m playwright install
-	```
-	或在打包前将浏览器二进制复制到 exe 所在目录。
-- 若遇到 DLL 缺失、依赖找不到等问题，可参考 PyInstaller 官方文档或在 spec 文件中手动调整 hiddenimports。
-
-如需进一步缩小体积，可考虑：
-- 用 nuitka 替代 PyInstaller（更激进的优化，但兼容性需测试）；
-- 用 UPX 进一步压缩；
-- 精简 requirements.txt，仅保留实际用到的库。
-
-如需自动生成打包脚本或 spec 文件，请告知你的 Python 版本和目标平台（如 Win10/Win11 x64）。
 
 ## 规则示例与使用场景
 
@@ -331,7 +271,12 @@ pyinstaller src\main.py --onefile --noconsole --name fif_gui --add-data "config.
 - 本程序仅用于学习，请勿用于非法用途。
 - 仅适用于 FiF 官网的页面，其他站点请自行修改代码。
 - 本项目由 Python 3.11 开发，请使用 Python 3.11 或更高版本运行，低于 python 3.11 的用户请自行修改代码。
-- Windows 系统用户请下载虚拟麦克风模块，并配置为默认输入源。
+- Windows 系统用户请下载虚拟麦克风模块，并配置为默认输入输出源。
 - 若末设置等级类型规则，则等级名“Role-play”将默认为“对话”，非等级名“Role-play”将默认为“跟读”。
-- 默认使用 GPU 模式，请自行配置 GPU 环境。
+- 默认使用 GPU 模式，请自行配置 GPU 环境，CPU 环境也可以运行，但速度会慢一点。
 
+## 其他说明
+
+- 本人目前只是一个普通的大学生（非计算机专业），代码有些是在AI的协同下完成的，请勿喷或者要求过高！
+- 目前 TTS 模型是 YourTTS ，模型质量不算太高，如有需求，请自行更换。
+- 若对你有用，请给个star。
