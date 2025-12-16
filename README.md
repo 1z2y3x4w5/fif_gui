@@ -274,6 +274,8 @@ python src\main.py
 - Windows 系统用户请下载虚拟麦克风模块，并配置为默认输入输出源。
 - 若末设置等级类型规则，则等级名“Role-play”将默认为“对话”，非等级名“Role-play”将默认为“跟读”。
 - 默认使用 GPU 模式，请自行配置 GPU 环境，CPU 环境也可以运行，但速度会慢一点。
+- 若出现“Model file not found in the output path”错误。
+--解决办法：[下载模型](https://coqui.gateway.scarf.sh/v0.10.1_models/tts_models--multilingual--multi-dataset--your_tts.zip)，将模型解压到C:\Users\ <用户名>\AppData\Local\tts文件夹中，tts文件夹可能没有，需要你自己创建。
 
 ## 其他说明
 
