@@ -6,7 +6,7 @@
 # 未来规划
 - 尝试更换其他模型
   - indextts_v2：推理时间过长，放弃(X)
-  - vits：测试中
+  - vits：模型已被coquitts弃用，放弃(X)
   - 其他模型还在尝试中
 - 打包成可执行应用（预计26年6月底完成）
 
@@ -224,7 +224,7 @@ python src\main.py
 - `skip_rules` 是跳过规则的数组；
 - `level_type_rules` 是等级类型规则（用于将某些等级强制识别为对话或跟读）。
 
-手动编辑 `config.json` 时请保持 JSON 格式正确，并在保存后在 GUI 中点击“刷新”或重启以加载。
+手动编辑 `config.json` 时请保持 JSON 格式正确，并在保存后重启 GUI 以加载。
 
 ## 规则示例与使用场景
 
@@ -278,7 +278,7 @@ python src\main.py
 - 本程序仅用于学习，请勿用于非法用途。
 - 仅适用于 FiF 官网的页面，其他站点请自行修改代码。
 - 本项目由 Python 3.11 开发，请使用 Python 3.11 或更高版本运行，低于 python 3.11 的用户请自行修改代码。
-- Windows 系统用户请下载虚拟麦克风模块，并配置为默认输入输出源。
+- Windows 系统用户请下载虚拟麦克风（如voicemeeter），并配置为默认输入输出源。
 - 若末设置等级类型规则，则等级名“Role-play”将默认为“对话”，非等级名“Role-play”将默认为“跟读”。
 - 默认使用 GPU 模式，请自行配置 GPU 环境，CPU 环境也可以运行，但速度会慢一点。
 - 若出现“Model file not found in the output path”错误。
