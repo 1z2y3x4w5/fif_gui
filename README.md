@@ -3,13 +3,6 @@
     <p align="center">TTS自动化完成FiF口语</p>
 </div>
 
-# 未来规划
-- 尝试更换其他模型
-  - indextts_v2：推理时间过长，放弃(X)
-  - vits：模型已被coquitts弃用，放弃(X)
-  - 其他模型还在尝试中
-- 打包成可执行应用（预计26年6月底完成）
-
 # 目录
 
 - 简介
@@ -30,7 +23,6 @@
   - 致敬
   - 引用
 - 注意事项
-- 其他说明
 
 ---
 
@@ -47,6 +39,7 @@
 ## 快速准备（依赖与环境）
 
 1. Python：建议使用 3.11（请按你的环境调整）。
+
 2. 创建虚拟环境:
 
 ```python
@@ -89,8 +82,12 @@ python -m playwright install
 ```
 
 6. pyaudio :
-- Windows 上常见安装建议:
-Windows 上 pip install pyaudio 容易失败（需要编译 C 扩展）。常用替代：
+
+```python
+pip install pyaudio
+```
+
+- 如果失败了，可替换：
 
 ```python
 python -m pip install pipwin
@@ -249,19 +246,15 @@ python src\main.py
 	- 检查 `requirements.txt` 中是否安装了 `TTS`、`num2words` 等依赖；
 	- 在内存或显存不足时考虑将合成模式改为 CPU。
 
-3. Windows 上声卡播放失败（`pyaudio` 问题）：
-	- 确认已正确安装 `pyaudio`；
-	- 如果无法通过 `pip` 安装，请尝试 `pipwin` 或从第三方 wheel 安装。
-
-4. Linux 下虚拟麦克风未创建：
+3.  Linux 下虚拟麦克风未创建：
 	- 确保 `pulseaudio` 正在运行，并允许加载 `module-pipe-source`；
 	- 检查 `/tmp/<VirtualPipeMic>` 文件是否存在。
 
-5. 跟读/对话识别不准确：
+4. 跟读/对话识别不准确：
 	- 使用“等级类型规则”显式指定；
 	- 如果你愿意，可以把规则改为更严格的匹配（在 GUI 中填写更具体的 `level_pattern`）。
 
-6. 若出现“Model file not found in the output path”错误。
+5. 若出现“Model file not found in the output path”错误。
 	- 解决办法：[下载模型](https://coqui.gateway.scarf.sh/v0.10.1_models/tts_models--multilingual--multi-dataset--your_tts.zip)，将模型解压到C:/Users/<用户名>/AppData/Local/tts文件夹中，tts文件夹可能没有，需要你自己创建，AppData文件夹是隐藏文件夹，需要手动打开文件资源管理器中的显示隐藏的项目。
 
 ## 声明
@@ -281,12 +274,8 @@ python src\main.py
 - 本程序仅用于学习，请勿用于非法用途。
 - 仅适用于 FiF 官网的页面，其他站点请自行修改代码。
 - 本项目由 Python 3.11 开发，请使用 Python 3.11 或更高版本运行，低于 python 3.11 的用户请自行修改代码。
-- Windows 系统用户请下载虚拟麦克风（如voicemeeter），并配置为默认输入输出源。
+- Windows 系统用户请下载虚拟麦克风（如voicemeeter），[操作参考视频](https://www.bilibili.com/video/BV1je5WzEEMy/?spm_id_from=333.337.search-card.all.click)，并配置为默认输入输出源。
 - 若末设置等级类型规则，则等级名“Role-play”将默认为“对话”，非等级名“Role-play”将默认为“跟读”。
 - 默认使用 GPU 模式，CPU 也可以运行，但速度会慢一点。
-
-## 其他说明
-
-### 模型说明
-
 - 目前 TTS 模型是 YourTTS ，模型质量不算太高，如有需求，请自行更换。
+- 目前只尝试过 Windows 11 ，其他系统未测试，但理论上只要依赖满足应该也能运行。
