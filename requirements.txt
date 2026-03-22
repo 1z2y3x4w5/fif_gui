@@ -1,4 +1,5 @@
 coqui-tts
+TTS==0.22.0
 numpy==1.24.3
 pyaudio==0.2.13
 playwright==1.41.1

@@ -1,8 +1,7 @@
 import json
 import re
 import logging
-import time
-from typing import Dict, Any, List, Optional
+from typing import Optional
 
 from playwright.sync_api import Page, sync_playwright
 
@@ -189,24 +188,43 @@ class FiFWebClient:
             
         qcontent = challenge_modes[0]["question"]["qcontent"]
         
-        # 处理没有item字段的情况
-        if "item" not in qcontent or not qcontent["item"]:
-            qcontent = self._process_qcontent_without_item(qcontent)
+        # 判断模式：如果有"roles"字段，则为对话模式，否则为非对话模式
+        if "roles" in qcontent:
+            # 对话模式：获取"text"标签后的句子
+            text = qcontent.get("text", "")
+            if not text:
+                return []
             
-        # 决定是否按 Role-play 方式处理。
-        # 优先使用传入的 level_name 判断；如果没有提供，则回退到检查 qcontent 中第一个 question 是否包含 photo 字段的旧判断。
-        is_roleplay = False
-        if level_name:
-            # 如果等级名中包含 role 或 role-play 则认为是 Role-play 类型
-            is_roleplay = 'role' in level_name.lower()
+            # 按##分割句子
+            sentences = [seg.strip() for seg in text.split('##') if seg.strip()]
+            
+            roles = qcontent.get("roles", "")
+            if not roles:
+                # 如果没有roles，按原顺序，去除前缀
+                result = [re.sub(r'^\w+:\s*', '', sent) for sent in sentences if ": " in sent]
+                return result
+            
+            # 解析roles，如"w1#m1"
+            roles_list = roles.split("#")
+            
+            # 收集每个角色的句子
+            role_sentences = {}
+            for sent in sentences:
+                if ": " in sent:
+                    role, content = sent.split(": ", 1)
+                    if role not in role_sentences:
+                        role_sentences[role] = []
+                    role_sentences[role].append(content.strip())
+            
+            # 按roles顺序排列句子
+            result = []
+            for r in roles_list:
+                if r in role_sentences:
+                    result.extend(role_sentences[r])
+            
+            return result
         else:
-            try:
-                is_roleplay = "photo" in qcontent["item"][0]["questions"][0]
-            except Exception:
-                is_roleplay = False
-
-        # 如果不是 Role-play（即跟读/逐句场景），则按顺序提取每个 question 的 title 字段，忽略 photo 字段
-        if not is_roleplay:
+            # 非对话模式：获取"title"标签后的句子
             answer = []
             for _i in qcontent.get("item", []):
                 for _j in _i.get("questions", []):
@@ -217,157 +235,6 @@ class FiFWebClient:
                         answer.append(title)
             return answer
 
-        # 否则保持原有的 Role-play 策略
-        return self.get_playrole_type_answer(qcontent)
-
-    def _process_qcontent_without_item(self, qcontent: Dict[str, Any]) -> Dict[str, Any]:
-        # 处理没有item字段的qcontent数据
-        text = qcontent.get("text", "")
-        if not text:
-            return qcontent
-
-        # 统一省略号为英文句号
-        text = text.replace('...', '.').replace('…', '.')    
-        # 按分隔符拆分为句子并过滤空段
-        text_list = [seg.strip() for seg in text.split('##') if seg.strip()]
-        
-        # 分析角色出现情况
-        roles_present = {
-            "m1": any("m1:" in t for t in text_list),
-            "w1": any("w1:" in t for t in text_list),
-            "m2": any("m2:" in t for t in text_list),
-            "w2": any("w2:" in t for t in text_list),
-        }
-        
-        # 角色替换逻辑 
-        
-        # 情况1: 有两男或两女对话，进行角色替换
-        if (roles_present["m2"] or roles_present["w2"]) and not (roles_present["m1"] and roles_present["w1"]):
-            for i, text_seg in enumerate(text_list):
-                # 两女对话
-                if roles_present["w2"] and not roles_present["m1"] and "w2:" in text_seg:
-                    text_list[i] = text_seg.replace("w2:", "m1:")
-                # 两男对话
-                elif roles_present["m2"] and not roles_present["w1"] and "m2:" in text_seg:
-                    text_list[i] = text_seg.replace("m2:", "w1:")
-        
-        # 情况2: 三人对话，过滤并替换角色
-        elif roles_present["m2"] or roles_present["w2"]:
-            # 两女一男
-            # 男生的台词去除
-            if roles_present["w2"] and not roles_present["m2"]:
-                filtered_text_list = []
-                for text_seg in text_list:
-                    if "m1:" in text_seg or "w2:" in text_seg:
-                        if "w2:" in text_seg:
-                            # 将女2替换为男1
-                            text_seg = text_seg.replace("w2:", "m1:")
-                        filtered_text_list.append(text_seg)
-                text_list = filtered_text_list
-            
-            # 两男一女
-            # 女生的台词去除
-            elif roles_present["m2"] and not roles_present["w2"]:
-                filtered_text_list = []
-                for text_seg in text_list:
-                    if "w1:" in text_seg or "m2:" in text_seg:
-                        if "m2:" in text_seg:
-                            # 将男2替换为女1
-                            text_seg = text_seg.replace("m2:", "w1:")
-                        filtered_text_list.append(text_seg)
-                text_list = filtered_text_list
-        
-        # 角色排序逻辑
-        if text_list and ("m1:" in text_list[0] or "w1:" in text_list[0]):
-            first_role = "m1" if "m1:" in text_list[0] else "w1"
-            
-            def role_key(text_seg):
-                if first_role == "m1":
-                    return 0 if "w1:" in text_seg else 1
-                else:
-                    return 0 if "m1:" in text_seg else 1
-            
-            text_list.sort(key=role_key)
-        
-        # 特殊文本替换
-        #for i, text_seg in enumerate(text_list):
-            #if text_seg == "OK":
-                #text_list[i] = "Okay"
-        
-        # 构建新的qcontent结构
-        questions = [{"text": "", "title": t} for t in text_list]
-        
-        return {
-            "item": [
-                {
-                    "questions": questions,
-                    "title": ""
-                }
-            ],
-            "titlenum": "1",
-            "description": "",
-            "sample": ""
-        }
-
-    def get_playrole_type_answer(self, qcontent):
-        answer = {}
-        role_init_count = {}
-        
-        # 初始化角色位置计数
-        for _i in qcontent["item"]:
-            for _j in _i["questions"]:
-                locate = -1
-                rec_time = _j.get("recordingTime", "").strip()
-                if rec_time:
-                    parts = rec_time.split("#")
-                    # 检查分割后是否有有效值
-                    if parts and parts[0].strip().isdigit():
-                        try:
-                            locate = int(parts[0].strip())
-                        except (ValueError, IndexError):
-                            locate = -1
-                
-                role_init_count[_j["photo"]] = locate if locate != -1 else 0
-        
-        # 同步修改答案处理逻辑
-        for _i in qcontent["item"]:
-            for _j in _i["questions"]:
-                locate = -1
-                rec_time = _j.get("recordingTime", "").strip()
-                if rec_time:
-                    parts = rec_time.split("#")
-                    if parts and parts[0].strip().isdigit():
-                        try:
-                            locate = int(parts[0].strip())
-                        except (ValueError, IndexError):
-                            locate = -1
-                
-                answer_string = _j["title"]
-                answer_string = re.sub(r'<[^>]+>', '', answer_string)
-                
-                if _j["photo"] not in answer:
-                    answer[_j["photo"]] = []
-                
-                # 确保locate有效
-                if locate != -1 and locate > 0:  
-                    while len(answer[_j["photo"]]) < locate - 1:
-                        answer[_j["photo"]].append("")
-                    if locate <= len(answer[_j["photo"]]):
-                        answer[_j["photo"]][locate - 1] += answer_string
-                    else:
-                        answer[_j["photo"]].append(answer_string)
-                else:
-                    answer[_j["photo"]].append(answer_string)
-        
-        result = []
-        sample = qcontent.get("sample", "")
-        sample_roles = sample.split("#") if sample else list(answer.keys())
-        
-        for role in sample_roles:
-            if role in answer:
-                result.extend(answer[role])
-                
-        return result
 
     def get_page(self):
         return self.page
