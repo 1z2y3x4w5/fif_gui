@@ -6,3 +6,5 @@ playwright==1.41.1
 soundfile==0.12.1
 tqdm==4.65.0
 num2words==0.5.14
+pycaw==20251023
+comtypes==1.4.16
