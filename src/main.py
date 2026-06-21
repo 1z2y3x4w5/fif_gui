@@ -113,8 +113,8 @@ class FiFApp:
 
         ttk.Label(self.skip_frame, text="等级类型:").grid(row=1, column=0, sticky='w', pady=5)
         self.chapter_type = tk.StringVar(value="Any")
-        self.chapter_type_combo = ttk.Combobox(self.skip_frame, textvariable=self.chapter_type, state='readonly', width=22)
-        self.chapter_type_combo['values'] = ("Any", "Role-play", "Expressions", "Group discussion")
+        self.chapter_type_combo = ttk.Combobox(self.skip_frame, textvariable=self.chapter_type, width=22)
+        self.chapter_type_combo['values'] = ("Any", "Role-play", "Expressions", "Group discussion", "Read aloud", "Vocabulary", "Grammar", "Listening")
         self.chapter_type_combo.grid(row=1, column=1, pady=5, padx=5)
 
         ttk.Label(self.skip_frame, text="等级编号 (可选):").grid(row=2, column=0, sticky='w', pady=5)
