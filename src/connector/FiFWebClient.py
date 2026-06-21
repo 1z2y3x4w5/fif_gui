@@ -488,7 +488,18 @@ class FiFWebClient:
 
     def get_page(self):
         return self.page
-        
+
+    def reset_page(self):
+        """重置页面释放内存，保留登录会话。"""
+        try:
+            old_page = self.page
+            old_page.goto("about:blank")  # 释放页面资源
+            self.page = self.context.new_page()  # 创建新页面
+            old_page.close()  # 关闭旧页面
+            self._log_msg("[FiF] 页面已重置，释放内存")
+        except Exception as e:
+            self._log_msg(f"[FiF] 页面重置失败: {e}")
+
     def get_context(self):
         return self.context
         

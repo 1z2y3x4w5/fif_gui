@@ -507,7 +507,12 @@ class FiFApp:
                         )
                         
                         self.log_message("[main] 第{}个等级完成。".format(k + 1))
-            
+                        # 每个等级完成后重置页面释放内存，防止 Chromium 崩溃
+                        try:
+                            fif.reset_page()
+                        except Exception:
+                            pass
+
             self.log_message("[main] 所有任务已完成!")
             
         except Exception as e:
