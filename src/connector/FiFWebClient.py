@@ -350,16 +350,16 @@ class FiFWebClient:
         return json_data
 
     def start_level_test(self, page: Page, speaker, unit_id, task_id, level_id, level_name: Optional[str] = None):
-        print(f"尝试加载{level_id}答案。")
+        self._log_msg(f"尝试加载 {level_id} 答案...")
         try:
             answer = self.get_level_answer(page, level_id, level_name)
             if answer:
-                print(f"已加载{len(answer)}条答案。")
+                self._log_msg(f"已加载 {len(answer)} 条答案。")
             else:
-                print("未找到答案。")
+                self._log_msg("未找到答案。")
         except Exception as e:
             raise Exception(f"加载答案失败: {str(e)}")
-        
+
         page.goto(
             self.urls["unit_test"].format(
                 self.get_user_info()["data"]["userId"],
@@ -372,17 +372,47 @@ class FiFWebClient:
         page.frame_locator("iframe").get_by_role("tab", name="挑战").click()
         page.frame_locator("iframe").get_by_role("button", name="开始挑战").click()
         page.wait_for_timeout(3000)
-        
+
         for answer_index, answer_text in enumerate(answer):
             print(f"等待开始录音。")
             page.frame_locator("iframe").get_by_text("结束录音").is_enabled(timeout=0)
-            print(f"正在回答第{answer_index + 1}条。答案，内容为：\n{answer_text}")
+            self._log_msg(f"回答 {answer_index + 1}/{len(answer)}: {answer_text[:60]}...")
             speaker.speak(answer_text)
             print(f"第{answer_index + 1}条回答完成。")
             page.frame_locator("iframe").get_by_text("结束录音").click()
-            
-        print("挑战完成。等待提交。")
+
+        self._log_msg("挑战完成，等待 AI 评分...")
         page.get_by_text("AI 评分").is_enabled(timeout=0)
+
+        # 提取分数
+        score = None
+        try:
+            page.wait_for_timeout(2000)  # 等评分动画完成
+            frame = page.frame_locator("iframe")
+            # 尝试找包含分数的文本
+            try:
+                score_text = frame.locator("text=/[0-9]+\\s*(分|score|Score)/i").first.text_content(timeout=5000)
+                nums = re.findall(r'(\d+)', score_text)
+                if nums:
+                    score = int(nums[0])
+            except Exception:
+                pass
+            # 后备：找评分数字元素
+            if score is None:
+                score_elements = frame.locator("[class*=score], [class*=result], [class*=grade]")
+                for i in range(min(score_elements.count(), 10)):
+                    text = score_elements.nth(i).text_content() or ""
+                    nums = re.findall(r'(\d+)', text)
+                    if nums:
+                        score = int(nums[0])
+                        break
+            if score is not None:
+                self._log_msg(f"🎯 当前等级得分: {score}")
+            else:
+                self._log_msg("未能获取分数（页面结构可能已变更）")
+        except Exception as e:
+            self._log_msg(f"获取分数失败: {e}")
+
         print("当前单元结束。")
 
     def get_level_answer(self, page: Page, level_id, level_name: Optional[str] = None):
