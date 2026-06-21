@@ -387,45 +387,31 @@ class FiFWebClient:
         # 提取分数
         score = None
         try:
-            page.wait_for_timeout(3000)  # 等评分动画完成
-
-            # 尝试在主页面和 iframe 中搜索
-            for scope_name, scope in [("主页", page), ("iframe", page.frame_locator("iframe"))]:
-                if score is not None:
-                    break
-                try:
-                    # 方法1：找包含分数的文本
-                    text = scope.locator("body").first.text_content(timeout=3000) or ""
-                    matches = re.findall(r'(\d+)\s*分', text)
-                    if matches:
-                        score = int(matches[0])
+            page.wait_for_timeout(2000)  # 等评分动画完成
+            frame = page.frame_locator("iframe")
+            # 尝试找包含分数的文本
+            try:
+                score_text = frame.locator("text=/[0-9]+\\s*(分|score|Score)/i").first.text_content(timeout=5000)
+                nums = re.findall(r'(\d+)', score_text)
+                if nums:
+                    score = int(nums[0])
+            except Exception:
+                pass
+            # 后备：找评分数字元素
+            if score is None:
+                score_elements = frame.locator("[class*=score], [class*=result], [class*=grade]")
+                for i in range(min(score_elements.count(), 10)):
+                    text = score_elements.nth(i).text_content() or ""
+                    nums = re.findall(r'(\d+)', text)
+                    if nums:
+                        score = int(nums[0])
                         break
-                    # 方法2：按 class 查找
-                    for cls in ["score", "result", "grade", "mark", "point"]:
-                        try:
-                            el = scope.locator(f"[class*={cls}]").first
-                            t = el.text_content(timeout=1000) or ""
-                            nums = re.findall(r'(\d+)', t)
-                            if nums and 0 < int(nums[0]) <= 100:
-                                score = int(nums[0])
-                                break
-                        except Exception:
-                            continue
-                except Exception:
-                    continue
-
             if score is not None:
-                self._log_msg(f"🎯 当前等级得分: {score} 分")
+                self._log_msg(f"🎯 当前等级得分: {score}")
             else:
-                # 调试：打印页面文本前 200 字符
-                try:
-                    body = page.locator("body").first.text_content() or ""
-                    snippet = body[:300].replace('\n', ' ')
-                    self._log_msg(f"未能获取分数，页面片段: {snippet}")
-                except Exception:
-                    self._log_msg("未能获取分数（页面可能已关闭）")
+                self._log_msg("未能获取分数（页面结构可能已变更）")
         except Exception as e:
-            self._log_msg(f"获取分数时出错: {e}")
+            self._log_msg(f"获取分数失败: {e}")
 
         print("当前单元结束。")
 
