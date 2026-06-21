@@ -32,10 +32,17 @@ class TTSSolver:
         if TTS is None:
             raise RuntimeError("TTS package is not available. Please install requirements.")
 
-        print("[TTS] 初始化神经网络（延迟）...")
-        use_gpu = True if self._mode == "cuda" else False
+        use_gpu = self._mode == "cuda"
         model_name = self.model or "tts_models/multilingual/multi-dataset/your_tts"
-        self._tts = TTS(model_name, gpu=use_gpu, progress_bar=True)
+
+        if use_gpu:
+            print("[TTS] 使用 GPU 加速初始化神经网络...")
+            self._tts = TTS(model_name, progress_bar=False)
+            self._tts.to("cuda")  # type: ignore
+        else:
+            print("[TTS] 使用 CPU 初始化神经网络（较慢）...")
+            self._tts = TTS(model_name, progress_bar=False)
+            self._tts.to("cpu")  # type: ignore
 
     def _normalize_currency_text(self, text: str) -> str:
         """将常见货币符号及金额转换为可读文本。

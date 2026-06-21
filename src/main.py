@@ -61,14 +61,14 @@ class FiFApp:
         
         ttk.Label(self.login_frame, text="密码:").grid(row=1, column=0, sticky='w', pady=5)
         ttk.Entry(self.login_frame, textvariable=self.password, show="*", width=30).grid(row=1, column=1, pady=5, padx=5)
-        
+
         # 目标音色
         ttk.Label(self.login_frame, text="目标音色文件:").grid(row=2, column=0, sticky='w', pady=5)
         ttk.Entry(self.login_frame, textvariable=self.target_voice_path, width=30).grid(row=2, column=1, pady=5, padx=5)
         ttk.Button(self.login_frame, text="浏览", command=self.browse_voice_file).grid(row=2, column=2, pady=5, padx=5)
 
         ttk.Label(self.login_frame, text="跳过分数:").grid(row=3, column=0, sticky='w', pady=5)
-        
+
         # 滑动条和输入框的框架
         score_frame = ttk.Frame(self.login_frame)
         score_frame.grid(row=3, column=1, sticky='ew', pady=5, padx=5)
@@ -219,7 +219,7 @@ class FiFApp:
                 "username": self.username.get(),
                 "password": self.password.get(),
                 "skip_score": self.skip_score.get(),
-                "target_voice_path": self.target_voice_path.get()
+                "target_voice_path": self.target_voice_path.get(),
             }
             # persist skip rules
             config["skip_rules"] = self.skip_rules
@@ -388,10 +388,6 @@ class FiFApp:
             self.start_btn.config(text="开始运行")
             self.log_message("程序已停止")
         else:
-            if not self.username.get() or not self.password.get():
-                messagebox.showerror("错误", "请输入用户名和密码")
-                return
-            
             # 确保tmp目录存在
             os.makedirs("tmp", exist_ok=True)
             
@@ -415,21 +411,35 @@ class FiFApp:
             
             self.log_message("[main] 正在检测环境并加载神经网络。")
             self.log_message(f"[main] 运行在: {platform.system()}")
-            
+
+            # 自动检测 GPU
+            try:
+                import torch
+                if torch.cuda.is_available():
+                    tts_mode = "cuda"
+                    self.log_message(f"[main] 检测到 GPU: {torch.cuda.get_device_name(0)}，使用 CUDA 加速")
+                else:
+                    tts_mode = "cpu"
+                    self.log_message("[main] 未检测到 GPU，使用 CPU 模式（较慢）")
+            except Exception:
+                tts_mode = "cpu"
+                self.log_message("[main] 无法检测 GPU，使用 CPU 模式")
+
             fif = FiFWebClient()
-            
-            # 初始化语音合成器
+            fif.set_logger(self.log_message)
+
+            # 初始化语音合成器（YourTTS 本地 GPU）
             speaker = Speaker(
                 "tts_models/multilingual/multi-dataset/your_tts",
-                "cpu",
+                tts_mode,
                 "VirtualPipeMic",
                 self.target_voice_path.get(),
             )
             
             self.log_message("[main] FiF口语,启动!")
             
-            # 登录
-            user_info = fif.login(self.username.get(), self.password.get())
+            # 手动登录：打开浏览器后等待用户手动完成登录
+            user_info = fif.manual_login()
             self.log_message(
                 "[main] {}登录成功。用户ID为{}。".format(
                     user_info["data"]["realName"], user_info["data"]["userId"]
