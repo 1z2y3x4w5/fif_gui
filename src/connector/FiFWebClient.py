@@ -256,9 +256,11 @@ class FiFWebClient:
             if answer:
                 print(f"已加载{len(answer)}条答案。")
             else:
-                print("未找到答案。")
+                print("未找到答案，跳过。")
+                return
         except Exception as e:
-            raise Exception(f"加载答案失败: {str(e)}")
+            print(f"加载答案失败: {e}")
+            return
         
         page.goto(
             self.urls["unit_test"].format(
