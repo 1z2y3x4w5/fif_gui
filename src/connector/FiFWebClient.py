@@ -474,33 +474,45 @@ class FiFWebClient:
             
             return result
         else:
-            # 非对话模式：获取答案文本（title 或 comment）
+            # 非对话模式：获取答案文本
             answer = []
-            self._log_msg(f"[FiF] 非对话模式，共 {len(qcontent.get('item', []))} 个 item")
-            for idx_i, _i in enumerate(qcontent.get("item", [])):
-                _i_copy = {k: str(v)[:200] for k, v in _i.items()}
-                self._log_msg(f"[FiF] item[{idx_i}] 完整: {json.dumps(_i_copy, ensure_ascii=False)}")
-                for idx_j, _j in enumerate(_i.get("questions", [])):
-                    _j_copy = {k: str(v)[:200] for k, v in _j.items()}
-                    self._log_msg(f"[FiF] questions[{idx_j}] 完整: {json.dumps(_j_copy, ensure_ascii=False)}")
-                    # 尝试所有可能的字段
-                    for field in ["title", "comment", "text", "content", "answer", "value", "label", "key", "word", "sentence"]:
+            items = qcontent.get("item", [])
+            for _i in items:
+                questions = _i.get("questions", [])
+                # 兼容 questions 是 JSON 字符串的情况
+                if isinstance(questions, str):
+                    try:
+                        questions = json.loads(questions.replace("'", '"'))
+                    except Exception:
+                        questions = []
+                if not isinstance(questions, list):
+                    questions = []
+                for _j in questions:
+                    if not isinstance(_j, dict):
+                        continue
+                    # 尝试所有可能的字段名
+                    text = ""
+                    for field in ["title", "comment", "text", "content", "answer", "value", "label", "key"]:
                         val = (_j.get(field) or "").strip()
                         if val:
-                            val = re.sub(r'<[^>]+>', '', val).strip()
-                            if val:
-                                answer.append(val)
+                            text = re.sub(r'<[^>]+>', '', val).strip()
+                            if text:
                                 break
-                # 如果 item 级别就有 text
+                    if text:
+                        answer.append(text)
+                # 如果 item 级别有答案
                 if not answer:
                     for field in ["title", "text", "content", "answer"]:
                         val = (_i.get(field) or "").strip()
                         if val:
                             val = re.sub(r'<[^>]+>', '', val).strip()
-                            if val:
-                                answer.append(val)
-                                break
-            self._log_msg(f"[FiF] 提取到 {len(answer)} 条答案")
+                        if val:
+                            answer.append(val)
+                            break
+            if not answer:
+                self._log_msg("[FiF] 警告: 未提取到任何答案文本，该题型可能不提供预存答案")
+            else:
+                self._log_msg(f"[FiF] 提取到 {len(answer)} 条答案")
             return answer
 
 
