@@ -478,16 +478,28 @@ class FiFWebClient:
             answer = []
             self._log_msg(f"[FiF] 非对话模式，共 {len(qcontent.get('item', []))} 个 item")
             for idx_i, _i in enumerate(qcontent.get("item", [])):
+                _i_copy = {k: str(v)[:200] for k, v in _i.items()}
+                self._log_msg(f"[FiF] item[{idx_i}] 完整: {json.dumps(_i_copy, ensure_ascii=False)}")
                 for idx_j, _j in enumerate(_i.get("questions", [])):
-                    title = (_j.get("title") or "").strip()
-                    comment = (_j.get("comment") or "").strip()
-                    self._log_msg(f"[FiF] item{idx_i}.q{idx_j}: title='{title[:60]}' comment='{comment[:60]}'")
-                    # 优先取 title，为空则取 comment
-                    text = title or comment
-                    # 去掉 HTML 标签
-                    text = re.sub(r'<[^>]+>', '', text).strip()
-                    if text:
-                        answer.append(text)
+                    _j_copy = {k: str(v)[:200] for k, v in _j.items()}
+                    self._log_msg(f"[FiF] questions[{idx_j}] 完整: {json.dumps(_j_copy, ensure_ascii=False)}")
+                    # 尝试所有可能的字段
+                    for field in ["title", "comment", "text", "content", "answer", "value", "label", "key", "word", "sentence"]:
+                        val = (_j.get(field) or "").strip()
+                        if val:
+                            val = re.sub(r'<[^>]+>', '', val).strip()
+                            if val:
+                                answer.append(val)
+                                break
+                # 如果 item 级别就有 text
+                if not answer:
+                    for field in ["title", "text", "content", "answer"]:
+                        val = (_i.get(field) or "").strip()
+                        if val:
+                            val = re.sub(r'<[^>]+>', '', val).strip()
+                            if val:
+                                answer.append(val)
+                                break
             self._log_msg(f"[FiF] 提取到 {len(answer)} 条答案")
             return answer
 
