@@ -290,6 +290,7 @@ class FiFWebClient:
             kw in (level_name or "").lower()
             for kw in ["read", "朗读", "朗诵", "passage", "陈述", "个人", "statement", "talk", "speech", "presentation", "monologue"]
         )
+        print(f"[DEBUG] level_name={level_name}, is_read_mode={is_read_mode}, answer_count={len(answer)}")
         if is_read_mode and len(answer) > 1:
             merged_text = " ".join(answer)
             print(f"短文朗读模式，合并 {len(answer)} 句为一段。")
@@ -372,7 +373,6 @@ class FiFWebClient:
         else:
             # 非对话模式：获取"title"标签后的句子
             answer = []
-            print(f"[DEBUG] qcontent: {json.dumps(qcontent, ensure_ascii=False)[:500]}")
             for _i in qcontent.get("item", []):
                 for _j in _i.get("questions", []):
                     title = _j.get("title", "")
