@@ -199,23 +199,33 @@ class FiFWebClient:
             self._log_msg(f"[FiF] 页面重置失败: {e}")
 
     def get_task_list(self, page):
-        response = page.request.fetch(
-            self.api_urls["get_task_list"],
-            method="post",
-            headers={
-                "Authorization": "Bearer " + self.user_auth["token"], # type: ignore
-                "source": self.user_auth["source"],
-            },
-            form={
-                "userId": self.get_user_info()["data"]["userId"],
-                "status": 1,
-                "page": 1,
-            },
-        )
-        json_data = response.json()
-        if json_data["status"] == -1:
-            raise Exception("获取任务列表失败")
-        return json_data
+        """获取所有页的任务列表。"""
+        all_tasks = []
+        page_num = 1
+        while True:
+            response = page.request.fetch(
+                self.api_urls["get_task_list"],
+                method="post",
+                headers={
+                    "Authorization": "Bearer " + self.user_auth["token"],
+                    "source": self.user_auth["source"],
+                },
+                form={
+                    "userId": self.get_user_info()["data"]["userId"],
+                    "status": 1,
+                    "page": page_num,
+                },
+            )
+            json_data = response.json()
+            if json_data["status"] == -1:
+                break
+            tasks = json_data.get("data", {}).get("ttiList", [])
+            if not tasks:
+                break
+            all_tasks.extend(tasks)
+            page_num += 1
+        self._log_msg(f"[FiF] 共获取到 {len(all_tasks)} 个任务（{page_num - 1} 页）")
+        return {"data": {"ttiList": all_tasks}}
 
     def get_ttd_list(self, page, task_id):
         response = page.request.fetch(
