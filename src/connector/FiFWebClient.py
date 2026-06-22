@@ -372,6 +372,7 @@ class FiFWebClient:
         else:
             # 非对话模式：获取"title"标签后的句子
             answer = []
+            print(f"[DEBUG] qcontent: {json.dumps(qcontent, ensure_ascii=False)[:500]}")
             for _i in qcontent.get("item", []):
                 for _j in _i.get("questions", []):
                     title = _j.get("title", "")
