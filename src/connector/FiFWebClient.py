@@ -275,26 +275,24 @@ class FiFWebClient:
         page.frame_locator("iframe").get_by_role("button", name="开始挑战").click()
         page.wait_for_timeout(3000)
         
-        # 检测是否为朗读模式（短文朗读应合并为一段）
+        # 检测是否为朗读模式
         is_read_mode = level_name and any(kw in (level_name or "").lower() for kw in ["read", "朗读", "朗诵", "passage"])
-
         if is_read_mode and len(answer) > 1:
             merged_text = " ".join(answer)
             print(f"短文朗读模式，合并 {len(answer)} 句为一段。")
+
+        for answer_index, answer_text in enumerate(answer):
             print(f"等待开始录音。")
             page.frame_locator("iframe").get_by_text("结束录音").is_enabled(timeout=0)
-            print(f"正在朗读: {merged_text[:80]}...")
-            speaker.speak(merged_text)
-            print("朗读完成。")
-            page.frame_locator("iframe").get_by_text("结束录音").click()
-        else:
-            for answer_index, answer_text in enumerate(answer):
-                print(f"等待开始录音。")
-                page.frame_locator("iframe").get_by_text("结束录音").is_enabled(timeout=0)
-                print(f"正在回答第{answer_index + 1}条。答案，内容为：\n{answer_text}")
+            if is_read_mode:
+                # 朗读模式：每次都念完整的合并文本
+                print(f"正在朗读 {answer_index + 1}/{len(answer)}: {merged_text[:80]}...")
+                speaker.speak(merged_text)
+            else:
+                print(f"正在回答第{answer_index + 1}条: {answer_text[:60]}...")
                 speaker.speak(answer_text)
-                print(f"第{answer_index + 1}条回答完成。")
-                page.frame_locator("iframe").get_by_text("结束录音").click()
+            print(f"第{answer_index + 1}条回答完成。")
+            page.frame_locator("iframe").get_by_text("结束录音").click()
             
         print("挑战完成。等待提交。")
         page.get_by_text("AI 评分").is_enabled(timeout=0)
