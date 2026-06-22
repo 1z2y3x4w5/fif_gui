@@ -438,15 +438,6 @@ class FiFWebClient:
             
         qcontent = challenge_modes[0]["question"]["qcontent"]
 
-        # 调试：打印 qcontent 结构
-        self._log_msg(f"[FiF] qcontent keys: {list(qcontent.keys())}")
-        if "item" in qcontent and qcontent["item"]:
-            sample = qcontent["item"][0]
-            self._log_msg(f"[FiF] item[0] keys: {list(sample.keys())}")
-            if "questions" in sample and sample["questions"]:
-                qs = sample["questions"]
-                self._log_msg(f"[FiF] questions[0] keys: {list(qs[0].keys())}, title={qs[0].get('title','')[:80]}")
-
         # 判断模式：如果有"roles"字段，则为对话模式，否则为非对话模式
         if "roles" in qcontent:
             # 对话模式：获取"text"标签后的句子
@@ -483,15 +474,18 @@ class FiFWebClient:
             
             return result
         else:
-            # 非对话模式：获取"title"标签后的句子
+            # 非对话模式：获取答案文本（title 或 comment）
             answer = []
             for _i in qcontent.get("item", []):
                 for _j in _i.get("questions", []):
-                    title = _j.get("title", "")
-                    # 去掉可能的 HTML 标签并修剪
-                    title = re.sub(r'<[^>]+>', '', title).strip()
-                    if title:
-                        answer.append(title)
+                    # 优先取 title，为空则取 comment
+                    text = (_j.get("title") or "").strip()
+                    if not text:
+                        text = (_j.get("comment") or "").strip()
+                    # 去掉 HTML 标签
+                    text = re.sub(r'<[^>]+>', '', text).strip()
+                    if text:
+                        answer.append(text)
             return answer
 
 
