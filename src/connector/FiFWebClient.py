@@ -286,11 +286,13 @@ class FiFWebClient:
         page.wait_for_timeout(3000)
         
         # 检测是否为朗读模式
+        # 需要合并录音的题型关键词
+        _merge_keywords = ["read", "朗读", "朗诵", "passage",
+            "陈述", "个人陈述", "个人", "personal", "statement",
+            "talk", "speech", "presentation", "monologue", "freestyle"]
         is_read_mode = level_name and any(
-            kw in (level_name or "").lower()
-            for kw in ["read", "朗读", "朗诵", "passage", "陈述", "个人", "statement", "talk", "speech", "presentation", "monologue"]
+            kw in (level_name or "").lower() for kw in _merge_keywords
         )
-        print(f"[DEBUG] level_name={level_name}, is_read_mode={is_read_mode}, answer_count={len(answer)}")
         if is_read_mode and len(answer) > 1:
             merged_text = " ".join(answer)
             print(f"短文朗读模式，合并 {len(answer)} 句为一段。")
