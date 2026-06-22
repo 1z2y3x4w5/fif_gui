@@ -476,16 +476,19 @@ class FiFWebClient:
         else:
             # 非对话模式：获取答案文本（title 或 comment）
             answer = []
-            for _i in qcontent.get("item", []):
-                for _j in _i.get("questions", []):
+            self._log_msg(f"[FiF] 非对话模式，共 {len(qcontent.get('item', []))} 个 item")
+            for idx_i, _i in enumerate(qcontent.get("item", [])):
+                for idx_j, _j in enumerate(_i.get("questions", [])):
+                    title = (_j.get("title") or "").strip()
+                    comment = (_j.get("comment") or "").strip()
+                    self._log_msg(f"[FiF] item{idx_i}.q{idx_j}: title='{title[:60]}' comment='{comment[:60]}'")
                     # 优先取 title，为空则取 comment
-                    text = (_j.get("title") or "").strip()
-                    if not text:
-                        text = (_j.get("comment") or "").strip()
+                    text = title or comment
                     # 去掉 HTML 标签
                     text = re.sub(r'<[^>]+>', '', text).strip()
                     if text:
                         answer.append(text)
+            self._log_msg(f"[FiF] 提取到 {len(answer)} 条答案")
             return answer
 
 
