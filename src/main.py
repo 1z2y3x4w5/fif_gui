@@ -389,24 +389,19 @@ class FiFApp:
         self.log_text.config(state='disabled')
     
     def _start_key_listener(self):
-        """启动终端键盘监听线程（非阻塞）。"""
-        if msvcrt is None:
-            return
+        """通过 GUI 窗口绑定快捷键（不需要终端聚焦）。"""
+        def handle_r(event):
+            self.key_command = 'R'
+            self.log_message("[快捷键] 收到重做命令 R")
+        def handle_s(event):
+            self.key_command = 'S'
+            self.log_message("[快捷键] 收到跳过命令 S")
 
-        def listen():
-            while self.is_running:
-                try:
-                    if msvcrt.kbhit():
-                        ch = msvcrt.getch().decode('utf-8').upper()
-                        if ch in ('R', 'S'):
-                            self.key_command = ch
-                            self.log_message(f"[终端输入] 收到命令: {ch}")
-                except Exception:
-                    pass
-
-        t = threading.Thread(target=listen, daemon=True)
-        t.start()
-        self.log_message("[main] 终端快捷键: R=重做当前等级 S=跳过下一等级")
+        self.root.bind('<KeyPress-r>', handle_r)
+        self.root.bind('<KeyPress-R>', handle_r)
+        self.root.bind('<KeyPress-s>', handle_s)
+        self.root.bind('<KeyPress-S>', handle_s)
+        self.log_message("[main] 快捷键: 在 GUI 窗口按 R=重做  S=跳过")
 
     def toggle_run(self):
         if self.is_running:
