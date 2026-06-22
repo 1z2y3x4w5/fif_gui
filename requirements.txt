@@ -1,4 +1,4 @@
-coqui-tts
+coqui-tts==0.24.1
 TTS==0.22.0
 numpy==1.24.3
 pyaudio==0.2.13
