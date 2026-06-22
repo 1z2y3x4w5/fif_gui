@@ -298,17 +298,23 @@ class FiFWebClient:
             print(f"短文朗读模式，合并 {len(answer)} 句为一段。")
 
         for answer_index, answer_text in enumerate(answer):
-            print(f"等待开始录音。")
-            page.frame_locator("iframe").get_by_text("结束录音").is_enabled(timeout=0)
+            print(f"等待开始录音 ({answer_index + 1}/{len(answer)})...")
+            try:
+                page.frame_locator("iframe").get_by_text("结束录音").is_enabled(timeout=30000)
+            except Exception:
+                print(f"录音等待超时 30s，跳过当前等级剩余 {len(answer) - answer_index} 题。")
+                return  # 跳过整个等级
             if is_read_mode:
-                # 朗读模式：每次都念完整的合并文本
                 print(f"正在朗读 {answer_index + 1}/{len(answer)}: {merged_text[:80]}...")
                 speaker.speak(merged_text)
             else:
                 print(f"正在回答第{answer_index + 1}条: {answer_text[:60]}...")
                 speaker.speak(answer_text)
             print(f"第{answer_index + 1}条回答完成。")
-            page.frame_locator("iframe").get_by_text("结束录音").click()
+            try:
+                page.frame_locator("iframe").get_by_text("结束录音").click(timeout=10000)
+            except Exception:
+                print("点击结束录音失败，继续下一题。")
             
         print("挑战完成。等待提交。")
         page.get_by_text("AI 评分").is_enabled(timeout=0)
