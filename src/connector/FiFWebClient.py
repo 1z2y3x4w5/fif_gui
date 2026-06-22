@@ -437,7 +437,16 @@ class FiFWebClient:
             raise Exception("未找到挑战模式内容")
             
         qcontent = challenge_modes[0]["question"]["qcontent"]
-        
+
+        # 调试：打印 qcontent 结构
+        self._log_msg(f"[FiF] qcontent keys: {list(qcontent.keys())}")
+        if "item" in qcontent and qcontent["item"]:
+            sample = qcontent["item"][0]
+            self._log_msg(f"[FiF] item[0] keys: {list(sample.keys())}")
+            if "questions" in sample and sample["questions"]:
+                qs = sample["questions"]
+                self._log_msg(f"[FiF] questions[0] keys: {list(qs[0].keys())}, title={qs[0].get('title','')[:80]}")
+
         # 判断模式：如果有"roles"字段，则为对话模式，否则为非对话模式
         if "roles" in qcontent:
             # 对话模式：获取"text"标签后的句子
