@@ -9,6 +9,11 @@ import threading
 import sys
 import importlib
 
+try:
+    import msvcrt  # Windows 终端输入
+except ImportError:
+    msvcrt = None
+
 # 添加模块路径
 sys.path.append('./connector')
 sys.path.append('./speaker')
@@ -35,6 +40,7 @@ class FiFApp:
         self.skip_score = tk.IntVar(value=80)
         self.target_voice_path = tk.StringVar(value="draft/target_voice.wav")
         self.is_running = False
+        self.key_command = None  # 键盘命令: 'R' 重做, 'S' 跳过
         # 跳过规则, 每项为 dict {unit_pattern, chapter_type, chapter_num}
         self.skip_rules = []
         # 等级类型规则: 每项为 dict {unit_pattern, level_pattern, level_type}
@@ -382,6 +388,26 @@ class FiFApp:
         self.log_text.see('end')
         self.log_text.config(state='disabled')
     
+    def _start_key_listener(self):
+        """启动终端键盘监听线程（非阻塞）。"""
+        if msvcrt is None:
+            return
+
+        def listen():
+            while self.is_running:
+                try:
+                    if msvcrt.kbhit():
+                        ch = msvcrt.getch().decode('utf-8').upper()
+                        if ch in ('R', 'S'):
+                            self.key_command = ch
+                            self.log_message(f"[终端输入] 收到命令: {ch}")
+                except Exception:
+                    pass
+
+        t = threading.Thread(target=listen, daemon=True)
+        t.start()
+        self.log_message("[main] 终端快捷键: R=重做当前等级 S=跳过下一等级")
+
     def toggle_run(self):
         if self.is_running:
             self.is_running = False
@@ -437,7 +463,10 @@ class FiFApp:
             )
             
             self.log_message("[main] FiF口语,启动!")
-            
+
+            # 启动键盘监听
+            self._start_key_listener()
+
             # 手动登录：打开浏览器后等待用户手动完成登录
             user_info = fif.manual_login()
             self.log_message(
@@ -496,6 +525,7 @@ class FiFApp:
                             )
                         )
                         
+                        self.key_command = None  # 清空上轮命令
                         fif.start_level_test(
                             fif.get_page(),
                             speaker,
@@ -505,7 +535,28 @@ class FiFApp:
                             # 根据用户设置的等级类型规则决定传入的 level_name
                             level_name=self._apply_level_type_rules(unit_name, level.get("levelName", "")),
                         )
-                        
+
+                        # 检查键盘命令
+                        if self.key_command == 'R':
+                            self.log_message("[main] 收到重做命令，重复当前等级...")
+                            fif.reset_page()
+                            fif.start_level_test(
+                                fif.get_page(),
+                                speaker,
+                                unit_id=unit_info["id"],
+                                task_id=task["id"],
+                                level_id=level["levelId"],
+                                level_name=self._apply_level_type_rules(unit_name, level.get("levelName", "")),
+                            )
+                        elif self.key_command == 'S':
+                            self.log_message("[main] 收到跳过命令，跳过后续等级...")
+                            # 重置页面后继续下一个单元
+                            try:
+                                fif.reset_page()
+                            except Exception:
+                                pass
+                            break  # 跳出当前单元的等级循环
+
                         self.log_message("[main] 第{}个等级完成。".format(k + 1))
                         # 每个等级完成后重置页面释放内存，防止 Chromium 崩溃
                         try:
