@@ -350,22 +350,12 @@ class FiFWebClient:
         return json_data
 
     def start_level_test(self, page: Page, speaker, unit_id, task_id, level_id, level_name: Optional[str] = None):
-        answer = []  # 确保每次调用从空开始
-        self._log_msg(f"尝试加载 {level_id} 答案...")
-        try:
-            answer = self.get_level_answer(page, level_id, level_name)
-            if answer:
-                self._log_msg(f"已加载 {len(answer)} 条答案。")
-            else:
-                self._log_msg("未找到答案，跳过该等级。")
-                # 重置页面，清除上一个等级的残留状态
-                try:
-                    page.goto("about:blank")
-                except Exception:
-                    pass
-                return
-        except Exception as e:
-            self._log_msg(f"加载答案失败: {e}")
+        self._log_msg(f"加载 {level_id} 答案...")
+        answer = self.get_level_answer(page, level_id, level_name)
+        if answer:
+            self._log_msg(f"已加载 {len(answer)} 条答案。")
+        else:
+            self._log_msg("未找到答案，跳过该等级。")
             return
 
         page.goto(
@@ -482,42 +472,27 @@ class FiFWebClient:
             
             return result
         else:
-            # 非对话模式：获取答案文本
+            # 非对话模式：获取答案（title，为空则取 comment）
             answer = []
-            items = qcontent.get("item", [])
-            for _i in items:
+            for _i in qcontent.get("item", []):
                 questions = _i.get("questions", [])
-                # 兼容 questions 是 JSON 字符串的情况
+                # 兼容 questions 为 JSON 字符串
                 if isinstance(questions, str):
                     try:
                         questions = json.loads(questions.replace("'", '"'))
                     except Exception:
                         questions = []
                 if not isinstance(questions, list):
-                    questions = []
+                    continue
                 for _j in questions:
                     if not isinstance(_j, dict):
                         continue
-                    # 尝试所有可能的字段名
-                    text = ""
-                    for field in ["title", "comment", "text", "content", "answer", "value", "label", "key"]:
-                        val = (_j.get(field) or "").strip()
-                        if val:
-                            text = re.sub(r'<[^>]+>', '', val).strip()
-                            if text:
-                                break
+                    text = (_j.get("title") or "").strip()
+                    if not text:
+                        text = (_j.get("comment") or "").strip()
+                    text = re.sub(r'<[^>]+>', '', text).strip()
                     if text:
                         answer.append(text)
-                # 如果 item 级别有答案
-                if not answer:
-                    for field in ["title", "text", "content", "answer"]:
-                        val = (_i.get(field) or "").strip()
-                        if val:
-                            val = re.sub(r'<[^>]+>', '', val).strip()
-                        if val:
-                            answer.append(val)
-                            break
-            # 空答案由调用方处理（跳过）
             return answer
 
 
