@@ -350,6 +350,7 @@ class FiFWebClient:
         return json_data
 
     def start_level_test(self, page: Page, speaker, unit_id, task_id, level_id, level_name: Optional[str] = None):
+        answer = []  # 确保每次调用从空开始
         self._log_msg(f"尝试加载 {level_id} 答案...")
         try:
             answer = self.get_level_answer(page, level_id, level_name)
@@ -357,9 +358,15 @@ class FiFWebClient:
                 self._log_msg(f"已加载 {len(answer)} 条答案。")
             else:
                 self._log_msg("未找到答案，跳过该等级。")
+                # 重置页面，清除上一个等级的残留状态
+                try:
+                    page.goto("about:blank")
+                except Exception:
+                    pass
                 return
         except Exception as e:
-            raise Exception(f"加载答案失败: {str(e)}")
+            self._log_msg(f"加载答案失败: {e}")
+            return
 
         page.goto(
             self.urls["unit_test"].format(
