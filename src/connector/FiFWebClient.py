@@ -356,7 +356,8 @@ class FiFWebClient:
             if answer:
                 self._log_msg(f"已加载 {len(answer)} 条答案。")
             else:
-                self._log_msg("未找到答案。")
+                self._log_msg("未找到答案，跳过该等级。")
+                return
         except Exception as e:
             raise Exception(f"加载答案失败: {str(e)}")
 
@@ -509,10 +510,7 @@ class FiFWebClient:
                         if val:
                             answer.append(val)
                             break
-            if not answer:
-                self._log_msg("[FiF] 警告: 未提取到任何答案文本，该题型可能不提供预存答案")
-            else:
-                self._log_msg(f"[FiF] 提取到 {len(answer)} 条答案")
+            # 空答案由调用方处理（跳过）
             return answer
 
 
