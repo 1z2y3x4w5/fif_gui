@@ -162,6 +162,22 @@ src
 
 ---
 
+## TTS 模型文件位置
+
+```
+C:\Users\<用户名>\AppData\Local\tts\tts_models--multilingual--multi-dataset--your_tts\
+├── config.json
+├── config_se.json
+├── language_ids.json
+├── model_file.pth
+├── model_se.pth
+└── speakers.json
+```
+
+> AppData 为隐藏目录，需开启显示隐藏文件后才能看到。
+
+---
+
 ## 致谢
 
 - [microsoft/playwright](https://github.com/microsoft/playwright)
